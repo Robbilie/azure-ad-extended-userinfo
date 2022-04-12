@@ -51,7 +51,7 @@ func userinfo(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gs, err := groups(auth, "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$top=999&$select=displayName,id")
+	gs, err := groups(auth, "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$top=999&$select="+getenv("GROUP_KEY", "id"))
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
@@ -93,8 +93,8 @@ func groups(auth string, url string) ([]string, error) {
 	var gs []string
 	gs = lo.Map(values, func(value interface{}, _ int) string {
 		m, _ := value.(map[string]interface{})
-		displayName, _ := m["displayName"].(string)
-		return displayName
+		key, _ := m[getenv("GROUP_KEY", "id")].(string)
+		return key
 	})
 	if graph["@odata.nextLink"] != nil {
 		nextLink, _ := graph["@odata.nextLink"].(string)
